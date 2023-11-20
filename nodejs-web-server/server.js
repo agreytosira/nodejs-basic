@@ -3,25 +3,34 @@ const http = require('http')
 const requestListener = (request, response) => {
   response.setHeader('Content-Type', 'text/html')
   response.statusCode = 200
+  const { url, method } = request
 
-  const { method } = request
+  if (url === '/') {
+    if (method === 'GET') {
+      response.end('Ini adalah homepage')
+    } else {
+      response.end(`Halaman tidak dapat diakses dengan ${method} request`)
+    }
+  } else if (url === '/about') {
+    if (method === 'GET') {
+      response.end('Halo! Ini adalah halaman about')
+    } else if (method === 'POST') {
+      let body = []
 
-  if (method === 'GET') {
-    response.end('<h1>Hello!</h1>')
-  }
+      request.on('data', (chunk) => {
+        body.push(chunk)
+      })
 
-  if (method === 'POST') {
-    let body = []
-
-    request.on('data', (chunk) => {
-      body.push(chunk)
-    })
-
-    request.on('end', () => {
-      body = Buffer.concat(body).toString()
-      const { name } = JSON.parse(body)
-      response.end(`<h1>Hai, ${name}!</h1>`)
-    })
+      request.on('end', () => {
+        body = Buffer.concat(body).toString()
+        const { name } = JSON.parse(body)
+        response.end(`Halo, ${name}! Ini adalah halaman about`)
+      })
+    } else {
+      response.end(`Halaman tidak dapat diakses dengan ${method} request`)
+    }
+  } else {
+    response.end(`Halaman tidak ditemukan!`)
   }
 }
 
